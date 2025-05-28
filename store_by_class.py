@@ -7,7 +7,7 @@ class PRODUCT:
     
     @staticmethod
     def sort():
-        PRODUCTS.sort(key= lambda x: int(x["code"]))
+        PRODUCTS.sort(key= lambda x: int(x.id))
     
     @staticmethod
     def add():
@@ -15,10 +15,10 @@ class PRODUCT:
             code = int(input("enter code: "))
             name = input("enter name: ")
             for product in PRODUCTS:
-                if int(product["code"]) == code:
+                if int(product.id) == code:
                     print("the code is exist.")
                     break
-                elif product["name"] == name:
+                elif product.name == name:
                     print("the name is exist.")
                     break
             else:
@@ -29,71 +29,54 @@ class PRODUCT:
         new_product = PRODUCT(code , name , price , count)
         PRODUCTS.append(new_product)
     
-    def edit(self):
-        '''''
-        while True:
-            edit_list = PRODUCT.search()
-            if edit_list != None:
-                edit_list["name"] = input("pls enter name: ")
-                edit_list["price"] = input("pls enter price: ")
-                edit_list["count"] = input("pls enter count: ")
-                break 
-    for product in PRODUCT:
-        if product["code"] == edit_list["code"] or product["name"] == edit_list["name"]:
-            product.update({"name":edit_list["name"] , "price":edit_list["price"] , "count":edit_list["count"]})
-    '''''
-    
+    def edit(self ,name ,price ,count):
+        self.name = name
+        self.price = price
+        self.count = count  
+        print("Product edited successfully.")
+   
     @staticmethod       
     def search():
-        '''''
-        user_input = input("type your keyword: ")  
+        user_input = input("type your name: ")  
         for product in PRODUCTS:
-            if product["code"] == user_input or product["name"] == user_input:
-                print(product["code"],"\t\t" , product["name"],"\t\t" , product["price"],"\t\t" ,product["count"],"\t\t" )
-                token = 1
+            if product.name == user_input:
+                print(product.id,"\t\t" , product.name,"\t\t" , product.price,"\t\t" ,product.count,"\t\t" )
                 return product
         else:
             print("not found")
-            token = -1
-        '''''
-    
+            
     def remove(self):
-        '''''
-        while True:
-            remove_from_list = PRODUCT.search() 
-            if remove_from_list != None:
-                for product in PRODUCTS:
-                    if product["code"] == remove_from_list["code"] or product["name"] == remove_from_list["name"]:
-                        PRODUCTS.remove(product)
-                        break
-                break
-        '''''
-    
+        PRODUCTS.remove(self)
+                          
     @staticmethod    
     def show_list():
         PRODUCT.sort()
-        print("code\t\tname\t\t\tprice\t\tcount") 
+        print("code\t\t name\t\t\t price\t\t\tcount") 
         for product in PRODUCTS:
-            print(product["code"], "\t\t" , product["name"], "\t\t\t" , product["price"])
+            print(product.id, "\t\t" , product.name, "\t\t\t" , product.price , "\t\t\t" , product.count)
         
-    def buy(self):
-        '''''
-        buy_items = search()
-        number_of_buy = int(input("how much do you want: "))
-        
-        for product in PRODUCTS:
-            if product["name"] == buy_items["name"]:
-                if int(product["count"]) >= number_of_buy:
-                    product["count"] = str(int(product["count"]) - number_of_buy)
+    def buy(self ,Total_price ,finish):
+        while finish == 0:
+            number_of_buy = int(input("how much do you want: "))
+            if int(self.count) >= number_of_buy:
+                self.count = int(self.count) - number_of_buy
+                Total_price = (int(self.price) * number_of_buy) + Total_price   
+            else:
+                print("Limited stock. Stock is ", self.count ," pieces.")
+            
+            print("Total_price: " ,Total_price)
+            while True:
+                finish_buy = input("do you want continue (yes or no): ")
+                if finish_buy == "no":
+                    finish = 1
+                    return finish
+                elif finish_buy == "yes":
+                    break
                 else:
-                    print("Limited stock. Stock is ", product["count"] ," pieces.")
-        finish_buy = input("if your buying is finish enter yes else enter no: ")
-        if finish_buy == "yes":
-            break
-        else:
-            continue
-        '''''
-        
+                    print("enter (yes or no): ") 
+       
+       
+       
 class Database:
     def __init__(self):
         ...
@@ -111,13 +94,18 @@ class Database:
             
             PRODUCTS.append(my_obj)
             
-            f.close
+        f.close()
 
     def write(self):
-        file = open("store/database.txt", "w")
-        for product in PRODUCTS:
-            if all(key in product for key in ["code", "name", "price", "count"]):
-                file.write(f"{product['code']},{product['name']},{product['price']},{product['count']}\n")
+        try:
+            with open("class/database.txt", "w") as file:
+                for product in PRODUCTS:
+                    file.write(f"{product.id},{product.name},{product.price},{product.count}\n")
+        except FileNotFoundError:
+            print("Error: Could not write to 'class/database.txt'. Check if the directory exists.")
+        except Exception as e:
+            print(f"Error while writing to file: {e}")
+
 
 class Store:
     def __init__(self):
@@ -136,6 +124,8 @@ class Store:
  
  
 PRODUCTS = []
+flag = 0
+Total_price = 0
 db = Database()    
 print("Welcome to farhad store")
 print("Loading...")
@@ -151,33 +141,30 @@ while True:
         PRODUCT.add()
     elif choice == 2:
         id = int(input("enter product id: "))
-        if p.id == id:
-            p.edit()
+        for p in PRODUCTS:
+            if int(p.id) == id:
+                name = input("pls enter name: ")
+                price = input("pls enter price: ")
+                count = int(input("pls enter count: "))
+                p.edit(name , price , count)
+                break
     elif choice == 3:
         id = int(input("enter product id: "))
         for p in PRODUCTS:
-            p.remove()
+            if int(p.id) == id:
+                p.remove()
     elif choice == 4:
         PRODUCT.search()
     elif choice == 5:
         PRODUCT.show_list()
     elif choice == 6:
-        while True:
-            name = int(input("enter product name: "))
-            if p.name == name:
-                p.buy()
-            while True:
-                end_buy = input("do you want to end buying(yes or no)? ")
-                if end_buy == "yes":
-                    flag == 1
+        finish = 0
+        while finish == 0:
+            name = input("enter product name: ")
+            for p in PRODUCTS:
+                if p.name == name:
+                    finish = p.buy(Total_price ,finish)
                     break
-                elif end_buy == "no":
-                    continue
-                else:
-                    print("pls write the (yes or no)")
-                    flag = 0
-            if flag == 1:
-                break
     elif choice == 7:
         PRODUCT.sort()
         db.write()
